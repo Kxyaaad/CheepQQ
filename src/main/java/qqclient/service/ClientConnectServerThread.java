@@ -1,6 +1,7 @@
 package qqclient.service;
 
-import org.qqcommon.Message;
+import qqcommon.Message;
+import qqcommon.MessageType;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -33,7 +34,17 @@ public class ClientConnectServerThread extends Thread{
             try {
                 ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
                 Message msg = (Message) objectInputStream.readObject(); //如果服务器没有返回信息，线程会阻塞
-
+                if (msg.getMsgType().equals(MessageType.MESSAGE_RETURN_ONLINE_FRIEND)) {
+                    String[] users = msg.getContent().split(",");
+                    System.out.println("==========当前在线用户列表==========");
+                    for (String user : users) {
+                        System.out.println("用户：" + user );
+                    }
+                }else if (msg.getMsgType().equals(MessageType.MESSAGE_COMMON_MES)){
+                    System.out.println( msg.getSender() + ":" + msg.getContent() + "\t\t" + msg.getSendTime());
+                } else if (msg.getMsgType().equals(MessageType.MESSAGE_TO_ALL_MES)) {
+                    System.out.println("群聊消息:" + msg.getContent() + "\t\t" + msg.getSendTime());
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } catch (ClassNotFoundException e) {
